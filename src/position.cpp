@@ -78,7 +78,7 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
   {
       StateInfo st;
       Position p;
-      p.set(pos.fen(), pos.is_chess960(), &st, pos.this_thread());
+      p.set(pos.fen(), false, &st, pos.this_thread());
       Tablebases::ProbeState s1, s2;
       Tablebases::WDLScore wdl = Tablebases::probe_wdl(p, &s1);
       int dtz = Tablebases::probe_dtz(p, &s2);
@@ -276,7 +276,7 @@ Position& Position::set(const string& fenStr, bool isChess960, StateInfo* si, Th
   // handle also common incorrect FEN with fullmove = 0.
   gamePly = std::max(2 * (gamePly - 1), 0) + (sideToMove == BLACK);
 
-  chess960 = isChess960;
+  chess960 = false;
   thisThread = th;
   set_state(st);
 
@@ -418,16 +418,16 @@ const string Position::fen() const {
   ss << (sideToMove == WHITE ? " w " : " b ");
 
   if (can_castle(WHITE_OO))
-      ss << (chess960 ? char('A' + file_of(castling_rook_square(WHITE_OO ))) : 'K');
+      ss << 'K';
 
   if (can_castle(WHITE_OOO))
-      ss << (chess960 ? char('A' + file_of(castling_rook_square(WHITE_OOO))) : 'Q');
+      ss << 'Q';
 
   if (can_castle(BLACK_OO))
-      ss << (chess960 ? char('a' + file_of(castling_rook_square(BLACK_OO ))) : 'k');
+      ss << 'k';
 
   if (can_castle(BLACK_OOO))
-      ss << (chess960 ? char('a' + file_of(castling_rook_square(BLACK_OOO))) : 'q');
+      ss << 'q';
 
   if (!can_castle(ANY_CASTLING))
       ss << '-';
@@ -533,8 +533,7 @@ bool Position::legal(Move m) const {
       // In case of Chess960, verify that when moving the castling rook we do
       // not discover some hidden checker.
       // For instance an enemy queen in SQ_A1 when castling rook is in SQ_B1.
-      return   !chess960
-            || !(attacks_bb<ROOK>(to, pieces() ^ to_sq(m)) & pieces(~us, ROOK, QUEEN));
+      return true;
   }
 
   // If the moving piece is a king, check whether the destination square is
@@ -1269,7 +1268,7 @@ void Position::flip() {
   std::getline(ss, token); // Half and full moves
   f += token;
 
-  set(f, is_chess960(), st, this_thread());
+  set(f, false, st, this_thread());
 
   assert(pos_is_ok());
 }

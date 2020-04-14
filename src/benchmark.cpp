@@ -28,7 +28,6 @@ using namespace std;
 namespace {
 
 const vector<string> Defaults = {
-  "setoption name UCI_Chess960 value false",
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 10",
   "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 11",
@@ -83,13 +82,7 @@ const vector<string> Defaults = {
   "r2r1n2/pp2bk2/2p1p2p/3q4/3PN1QP/2P3R1/P4PP1/5RK1 w - - 0 1",
   "8/8/8/8/8/6k1/6p1/6K1 w - -",
   "7k/7P/6K1/8/3B4/8/8/8 b - -",
-
-  // Chess 960
-  "setoption name UCI_Chess960 value true",
-  "bbqnnrkr/pppppppp/8/8/8/8/PPPPPPPP/BBQNNRKR w HFhf - 0 1 moves g2g3 d7d5 d2d4 c8h3 c1g5 e8d6 g5e7 f7f6",
-  "setoption name UCI_Chess960 value false"
 };
-
 } // namespace
 
 /// setup_bench() builds a list of UCI commands to be run by bench. There

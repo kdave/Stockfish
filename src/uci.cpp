@@ -66,7 +66,7 @@ namespace {
         return;
 
     states = StateListPtr(new std::deque<StateInfo>(1)); // Drop old and create a new one
-    pos.set(fen, Options["UCI_Chess960"], &states->back(), Threads.main());
+    pos.set(fen, false, &states->back(), Threads.main());
 
     // Parse move list (if any)
     while (is >> token && (m = UCI::to_move(pos, token)) != MOVE_NONE)
@@ -343,7 +343,7 @@ string UCI::move(Move m, bool chess960) {
   if (m == MOVE_NULL)
       return "0000";
 
-  if (type_of(m) == CASTLING && !chess960)
+  if (type_of(m) == CASTLING)
       to = make_square(to > from ? FILE_G : FILE_C, rank_of(from));
 
   string move = UCI::square(from) + UCI::square(to);
@@ -364,7 +364,7 @@ Move UCI::to_move(const Position& pos, string& str) {
       str[4] = char(tolower(str[4]));
 
   for (const auto& m : MoveList<LEGAL>(pos))
-      if (str == UCI::move(m, pos.is_chess960()))
+      if (str == UCI::move(m, false))
           return m;
 
   return MOVE_NONE;
