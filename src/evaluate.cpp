@@ -42,13 +42,19 @@
 //     const unsigned char        gEmbeddedNNUEData[];  // a pointer to the embedded data
 //     const unsigned char *const gEmbeddedNNUEEnd;     // a marker to the end
 //     const unsigned int         gEmbeddedNNUESize;    // the size of the embedded file
-// Note that this does not work in Microsof Visual Studio.
-#if !defined(_MSC_VER) && !defined(NNUE_EMBEDDING_OFF)
-  INCBIN(EmbeddedNNUE, EvalFileDefaultName);
-#else
+// Note that this does not work in Microsoft Visual Studio.
+#ifdef _MSC_VER
+#define INTERNAL_PATH
   const unsigned char        gEmbeddedNNUEData[1] = {0x0};
   const unsigned char *const gEmbeddedNNUEEnd = &gEmbeddedNNUEData[1];
   const unsigned int         gEmbeddedNNUESize = 1;
+#elif defined(NNUE_EMBEDDING_OFF)
+  // NNUE not embedded
+#define INTERNAL_PATH
+#else
+  // Embeddded NNUE
+#define INTERNAL_PATH "<internal>",
+  INCBIN(EmbeddedNNUE, EvalFileDefaultName);
 #endif
 
 
@@ -79,9 +85,9 @@ namespace Eval {
     #if defined(DEFAULT_NNUE_DIRECTORY)
     #define stringify2(x) #x
     #define stringify(x) stringify2(x)
-    vector<string> dirs = { "<internal>" , "" , CommandLine::binaryDirectory , stringify(DEFAULT_NNUE_DIRECTORY) };
+    vector<string> dirs = { INTERNAL_PATH /*,*/ "" , CommandLine::binaryDirectory , stringify(DEFAULT_NNUE_DIRECTORY) };
     #else
-    vector<string> dirs = { "<internal>" , "" , CommandLine::binaryDirectory };
+    vector<string> dirs = { INTERNAL_PATH /*,*/ "" , CommandLine::binaryDirectory };
     #endif
 
     for (string directory : dirs)
@@ -93,7 +99,7 @@ namespace Eval {
                 if (load_eval(eval_file, stream))
                     eval_file_loaded = eval_file;
             }
-
+#ifndef NNUE_EMBEDDING_OFF
             if (directory == "<internal>" && eval_file == EvalFileDefaultName)
             {
                 // C++ way to prepare a buffer for a memory stream
@@ -108,7 +114,12 @@ namespace Eval {
                 if (load_eval(eval_file, stream))
                     eval_file_loaded = eval_file;
             }
+#endif
         }
+    if (eval_file_loaded == "None") {
+        string msg = eval_file + "not found in the search directories, set EvalFile";
+        sync_cout << "info string ERROR: " << msg << sync_endl;
+    }
   }
 
   /// NNUE::verify() verifies that the last net used was loaded successfully

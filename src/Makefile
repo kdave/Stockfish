@@ -78,6 +78,8 @@ endif
 # vnni256 = yes/no    --- -mavx512vnni     --- Use Intel Vector Neural Network Instructions 256
 # vnni512 = yes/no    --- -mavx512vnni     --- Use Intel Vector Neural Network Instructions 512
 # neon = yes/no       --- -DUSE_NEON       --- Use ARM SIMD architecture
+# embednnue = yes/no  ---                  --- Embed the latest NNUE net in the binary
+# nnuedir =           ---                  --- Additional search directory for NNUE net
 #
 # Note that Makefile is space sensitive, so when adding new architectures
 # or modifying existing flags, you have to make sure there are no extra spaces
@@ -119,6 +121,9 @@ vnni256 = no
 vnni512 = no
 neon = no
 STRIP = strip
+
+embednnue = yes
+nnuedir =
 
 ### 2.2 Architecture specific
 
@@ -506,6 +511,13 @@ ifeq ($(popcnt),yes)
 	endif
 endif
 
+ifeq ($(embednnue),no)
+  CXXFLAGS += -DNNUE_EMBEDDING_OFF
+endif
+
+ifneq ($(nnuedir),)
+  CXXFLAGS += -DDEFAULT_NNUE_DIRECTORY="$(nnuedir)/"
+endif
 
 ifeq ($(avx2),yes)
 	CXXFLAGS += -DUSE_AVX2
